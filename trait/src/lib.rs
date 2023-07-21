@@ -8,10 +8,31 @@ use glam::{DVec2, DVec3, DVec4, IVec2, IVec3, IVec4, UVec2, UVec3, UVec4, Vec2, 
 
 //
 
-pub trait VertexAttribute {
-    const FORMAT: wgpu::VertexFormat;
-}
-
+/// # VertexLayout trait (and macro)
+///
+/// Generates vertex buffer layouts ([`wgpu::VertexBufferLayout`])
+///
+/// Fields need to implement [`VertexAttribute`]
+///
+/// # Usage
+///
+/// ```ignore
+/// use wgpu_macro::{VertexAttribute, VertexLayout};
+/// use glam::Vec3;
+///
+/// #[derive(VertexLayout)]
+/// struct Vertex {
+///     pos: Vec3,
+/// }
+///
+/// device.create_render_pipeline(&RenderPipelineDescriptor {
+///     vertex: VertexState {
+///         buffers: &[Vertex::LAYOUT_VERTEX],
+///         ..
+///     },
+///     ..
+/// });
+/// ```
 pub trait VertexLayout: Sized {
     const ATTRIBUTES: &'static [wgpu::VertexAttribute];
 
@@ -32,6 +53,13 @@ pub trait VertexLayout: Sized {
         step_mode: wgpu::VertexStepMode::Instance,
         attributes: Self::ATTRIBUTES,
     };
+}
+
+/// # VertexAttribute
+///
+/// Vertex format for a field, used in [`VertexLayout`]
+pub trait VertexAttribute {
+    const FORMAT: wgpu::VertexFormat;
 }
 
 macro_rules! impl_multi {
