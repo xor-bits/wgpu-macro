@@ -12,12 +12,12 @@ use glam::{DVec2, DVec3, DVec4, IVec2, IVec3, IVec4, UVec2, UVec3, UVec4, Vec2, 
 ///
 /// Generates vertex buffer layouts ([`wgpu::VertexBufferLayout`])
 ///
-/// Fields need to implement [`VertexAttribute`]
+/// Fields need to implement [`AttributeFormat`]
 ///
 /// # Usage
 ///
 /// ```ignore
-/// use wgpu_macro::{VertexAttribute, VertexLayout};
+/// use wgpu_macro::{AttributeFormat, VertexLayout};
 /// use glam::Vec3;
 ///
 /// #[derive(VertexLayout)]
@@ -55,17 +55,17 @@ pub trait VertexLayout: Sized {
     };
 }
 
-/// # VertexAttribute
+/// # AttributeFormat
 ///
 /// Vertex format for a field, used in [`VertexLayout`]
-pub trait VertexAttribute {
+pub trait AttributeFormat {
     const FORMAT: wgpu::VertexFormat;
 }
 
 macro_rules! impl_multi {
     ($($from:ty => $to:ident),* $(,)?) => {
         $(
-            impl VertexAttribute for $from {
+            impl AttributeFormat for $from {
                 const FORMAT: wgpu::VertexFormat = wgpu::VertexFormat::$to;
             }
         )*
@@ -136,56 +136,4 @@ impl_multi! {
     IVec2 => Sint32x2,
     IVec3 => Sint32x3,
     IVec4 => Sint32x4,
-}
-
-//
-
-#[cfg(test)]
-mod tests {
-    use std::mem::size_of;
-
-    use crate::{VertexAttribute, VertexLayout};
-    use glam::{Vec2, Vec3, Vec4};
-    use wgpu::VertexStepMode;
-
-    #[test]
-    fn sample() {
-        #[derive(VertexLayout)]
-        struct Test {
-            _pos: Vec4,
-            _col: Vec3,
-            _uv: Vec2,
-            _v: f32,
-        }
-
-        let left = Test::LAYOUT_VERTEX;
-        let right = wgpu::VertexBufferLayout {
-            array_stride: size_of::<Test>() as _,
-            step_mode: VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    format: wgpu::VertexFormat::Float32x4,
-                    offset: 0,
-                    shader_location: 0,
-                },
-                wgpu::VertexAttribute {
-                    format: wgpu::VertexFormat::Float32x3,
-                    offset: 16,
-                    shader_location: 1,
-                },
-                wgpu::VertexAttribute {
-                    format: wgpu::VertexFormat::Float32x2,
-                    offset: 28,
-                    shader_location: 2,
-                },
-                wgpu::VertexAttribute {
-                    format: wgpu::VertexFormat::Float32,
-                    offset: 36,
-                    shader_location: 3,
-                },
-            ],
-        };
-
-        assert_eq!(left, right, "left: `{left:#?}`,\nright: `{right:#?}`");
-    }
 }

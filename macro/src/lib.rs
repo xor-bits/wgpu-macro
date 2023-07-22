@@ -67,7 +67,7 @@ pub fn derive_vertex_layout(input: proc_macro::TokenStream) -> proc_macro::Token
         quote! {
             #acc
             wgpu::VertexAttribute {
-                format: <#ty as VertexAttribute>::FORMAT,
+                format: <#ty as wgpu_trait::AttributeFormat>::FORMAT,
                 offset: #offset,
                 shader_location: #shader_location
             },
@@ -75,7 +75,7 @@ pub fn derive_vertex_layout(input: proc_macro::TokenStream) -> proc_macro::Token
     });
 
     (quote! {
-        impl #imp VertexLayout for #ident #gen #wher {
+        impl #imp wgpu_trait::VertexLayout for #ident #gen #wher {
             const ATTRIBUTES: &'static [wgpu::VertexAttribute] = &[
                 #attribs
             ];
